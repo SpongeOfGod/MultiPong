@@ -24,7 +24,6 @@ public class NetworkLauncher : MonoBehaviourPunCallbacks
     [SerializeField] private Transform roomListContent;
     [SerializeField] private GameObject roomListItemPrefab;
 
-    private Dictionary<string, GameObject> activeLobbies = new Dictionary<string, GameObject>();
 
     [Header("Player List")]
     [SerializeField] private Transform playerListContent;
@@ -71,7 +70,11 @@ public class NetworkLauncher : MonoBehaviourPunCallbacks
             return;
         }
 
-        PhotonNetwork.CreateRoom(roomNameInputField.text);
+        RoomOptions roomOptions = new RoomOptions();
+        roomOptions.MaxPlayers = 4;
+        roomOptions.IsVisible = true;
+
+        PhotonNetwork.CreateRoom(roomNameInputField.text, roomOptions);
         MenuManager.Instance.OpenMenu("loading");
     }
 
@@ -138,53 +141,15 @@ public class NetworkLauncher : MonoBehaviourPunCallbacks
     {
         foreach (Transform trans in roomListContent)
         {
-            Debug.Log("Room destroyed = " + trans.name);
             Destroy(trans.gameObject);
         }
 
         for (int i = 0; i < roomList.Count; i++)
         {
-            Debug.Log("Room List Count = " + roomList.Count);
             if (roomList[i].RemovedFromList) continue;
 
             Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().SetUp(roomList[i]);
-            Debug.Log("Room Created = " + roomList[i].Name);
         }
-
-
-
-
-
-
-        //foreach (var room in new List<string>(activeLobbies.Keys))
-        //{
-        //    if (!roomList.Exists(r => r.Name == room))
-        //    {
-        //        Destroy(activeLobbies[room]);
-        //        activeLobbies.Remove(room);
-        //    }
-        //}
-
-        //foreach (RoomInfo roomInfo in roomList)
-        //{
-        //    if (activeLobbies.ContainsKey(roomInfo.Name))
-        //    {
-        //        var text = activeLobbies[roomInfo.Name].GetComponentInChildren<TextMeshProUGUI>();
-        //        text.text = $"{roomInfo.Name} ({roomInfo.PlayerCount}/{roomInfo.MaxPlayers})";
-        //    }
-        //    else
-        //    {
-        //        GameObject entry = Instantiate(LobbyEntryPrefab, LobbyListContainer);
-        //        var text = entry.GetComponentInChildren<TextMeshProUGUI>();
-        //        text.text = $"{roomInfo.Name} ({roomInfo.PlayerCount}/{roomInfo.MaxPlayers})";
-
-        //        Button btn = entry.GetComponentInChildren<Button>();
-        //        string lobbyName = roomInfo.Name;
-        //        btn.onClick.AddListener(() => JoinLobbyFromButton(lobbyName));
-
-        //        activeLobbies.Add(roomInfo.Name, entry);
-        //    }
-        //}
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)

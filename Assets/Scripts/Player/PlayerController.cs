@@ -4,17 +4,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPunCallbacks
 {
-    PhotonView PhotonView;
-    MeshRenderer MeshRenderer;
+    [SerializeField] private float velocity;
+
+    private PhotonView PV;
+    private MeshRenderer MeshRenderer;
+
     private void Awake()
     {
-        PhotonView = GetComponent<PhotonView>();
+        PV = GetComponent<PhotonView>();
         MeshRenderer = GetComponent<MeshRenderer>();
     }
 
     private void Start()
+    {
+        if (!PV.IsMine) return;
+
+        PV.RPC("RPC_ChangePlayerColor", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_ChangePlayerColor()
     {
         Debug.Log(MeshRenderer);
         MaterialPropertyBlock block = new();
@@ -24,11 +35,10 @@ public class PlayerController : MonoBehaviour
         block.SetColor("_Color", newColor);
         MeshRenderer.SetPropertyBlock(block);
     }
-    public float velocity = 0;
 
     void Update()
     {
-        if (!PhotonView.IsMine) return;
+        if (!PV.IsMine) return;
 
         var inputY = Input.GetAxisRaw("Vertical");
         var actualPosition = transform.position;
@@ -36,8 +46,8 @@ public class PlayerController : MonoBehaviour
         var amountToMove = inputY * velocity * Time.deltaTime;
 
 
-        if (inputY > 0 && actualPosition.y + amountToMove >= GameManager.Instance.BorderUpY ||
-            inputY < 0 && actualPosition.y + amountToMove <= GameManager.Instance.BorderDownY)
+        if (inputY > 0 && actualPosition.y + (transform.lossyScale.y / 2) + amountToMove >= GameManager.Instance.BorderUpY - 0.05f ||
+            inputY < 0 && actualPosition.y - (transform.lossyScale.y / 2) + amountToMove <= GameManager.Instance.BorderDownY + 0.05f)
             amountToMove = 0;
 
 

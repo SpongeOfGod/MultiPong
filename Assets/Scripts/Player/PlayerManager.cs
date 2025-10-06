@@ -1,18 +1,36 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private PhotonView PV;
+
+    private void Awake()
     {
-        
+        PV = GetComponent<PhotonView>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        
+        if (PV.IsMine)
+        {
+            CreateController();
+        }
+    }
+
+    private void CreateController()
+    {
+        Debug.Log("Instantiate Player Controller");
+        PhotonNetwork.Instantiate("PlayerPaddle", GetPlayerSpawnLocation(), Quaternion.identity);
+    }
+
+    private Vector3 GetPlayerSpawnLocation()
+    {
+        // Get the local player's index in the room
+        int playerIndex = System.Array.IndexOf(PhotonNetwork.PlayerList, PhotonNetwork.LocalPlayer);
+
+        return SpawnManager.Instance.Spawnpoints[playerIndex].position;
     }
 }
