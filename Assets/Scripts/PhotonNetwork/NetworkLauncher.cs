@@ -123,6 +123,7 @@ public class NetworkLauncher : MonoBehaviourPunCallbacks
 
     public void StartGame()
     {
+        if (PhotonNetwork.PlayerList.Length < 2) return;
         PhotonNetwork.LoadLevel(1);
     }
 
