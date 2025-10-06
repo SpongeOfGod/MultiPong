@@ -21,16 +21,21 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         if (!PV.IsMine) return;
 
-        PV.RPC("RPC_ChangePlayerColor", RpcTarget.All);
+        float r = Random.Range(0f, 1f);
+        float g = Random.Range(0f, 1f);
+        float b = Random.Range(0f, 1f);
+
+        PV.RPC("RPC_ChangePlayerColor", RpcTarget.All, r, g, b);
     }
 
     [PunRPC]
-    private void RPC_ChangePlayerColor()
+    private void RPC_ChangePlayerColor(float r, float g, float b)
     {
+        Color newColor = new Color(r, g, b);
+
         Debug.Log(MeshRenderer);
         MaterialPropertyBlock block = new();
         MeshRenderer.GetPropertyBlock(block);
-        Color newColor = new Color(Random.Range(0f, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
         Debug.Log(newColor);
         block.SetColor("_Color", newColor);
         MeshRenderer.SetPropertyBlock(block);
